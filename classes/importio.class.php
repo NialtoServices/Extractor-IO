@@ -216,7 +216,7 @@ class ImportIO {
 
 		if ($result['latestVersionGuid']) {
 			$url = 'https://api.import.io/store/connectorversion/_io?id=';
-			$url .= $connector_result['latestVersionGuid'];
+			$url .= $result['latestVersionGuid'];
 			$url .= '&_user=';
 			$url .= urlencode($this->user_guid);
 			$url .= '&_apikey=';

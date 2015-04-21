@@ -7,7 +7,6 @@ require_once('ns_array_hash.class.php');
 
 class Connector_Fields_List_Table extends WP_List_Table {
 	function __construct() {
-		global $status, $page;
 		parent::__construct(
 			array(
 				'singular' => 'connector_field',

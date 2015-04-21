@@ -110,8 +110,8 @@ if (!function_exists('ns_extractor')) {
 	</div>
 <?php
 			ob_flush();
-			$connector = ImportIO::instance()()->get_connector( 'name', $_POST['connector'] );
-			$data = ImportIO::instance()()->query_url( $_POST['url'], $connector )[0];
+			$connector = ImportIO::instance()->get_connector( 'name', $_POST['connector'] );
+			$data = ImportIO::instance()->query_url( $_POST['url'], $connector )[0];
 			$post_id = wp_insert_post(
 				array(
 					"post_title" => "Extractor IO - Importing Your Data ...",
@@ -518,7 +518,7 @@ if (!function_exists('ns_extractor_update_connector')) {
 if (!function_exists('ns_extractor_fetch_connector_fields')) {
 	function ns_extractor_fetch_connector_fields( $connector_id ) {
 		$connector = get_option( 'ns_extractor_connectors' )[$connector_id];
-		$fields = ImportIO::instance()()->connector_schema($connector);
+		$fields = ImportIO::instance()->connector_schema($connector);
 		$connector_fields = get_option( 'ns_extractor_connector_fields' );
 		$connector_fields = ($connector_fields) ? $connector_fields : array();
 		$connector_fields[$connector['name']] = $fields;
