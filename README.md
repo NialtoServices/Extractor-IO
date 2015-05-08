@@ -14,8 +14,5 @@ Setup connector mapping by going to: `Extractor IO -> Settings -> (Your Connecto
 
 Now setup where you want your extractor's fields to be imported to.
 
-## Usage
-Go to settings and follow the instructions to setup the plugin.
-
 ## Extract Data!
 Use the extractor to import your data!
