@@ -44,6 +44,8 @@ if (!defined('ABSPATH')) {
 		<?php submit_button('Extract Data'); ?>
 	</form>
 </div>
+<?php elseif (EIO()->import_io): ?>
+<p><?php echo __('<strong>No Connectors Found</strong><br />You need a connector to be able to extract data from sites.<br />You can add a connector from your Import IO account.', 'extractor-io'); ?></p>
 <?php else: ?>
-<p>You don't have any connectors. You can add a connector using the Import IO app from https://import.io</p>
+<p><?php echo __('<strong>No Account Configured</strong><br />You need to setup your Import IO account to be able to use this plugin.<br />Go to the settings page to configure your account:<br /><br /><a href="?page=eio-settings" class="button">Settings</a></p>', 'extractor-io'); ?></p>
 <?php endif; ?>
