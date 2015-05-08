@@ -80,7 +80,7 @@ final class EIO_Settings_Manager {
 			return;
 		}
 		
-		if (false !== empty($_POST['eio_settings_nonce']) && wp_verify_nonce($_POST['eio_settings_nonce'], 'eio_update_settings')) {
+		if (false === empty($_POST['eio_settings_nonce']) && wp_verify_nonce($_POST['eio_settings_nonce'], 'eio_update_settings')) {
 			$this->save_main_settings();
 		} else if (false === empty($_POST['eio_connector_mapping_nonce']) && false === empty($_GET['connector']) && wp_verify_nonce($_POST['eio_connector_mapping_nonce'], 'eio_update_connector_mapping_' . $_GET['connector'])) {
 			$this->save_connector_mapping_settings();
