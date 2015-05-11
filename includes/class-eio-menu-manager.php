@@ -14,7 +14,7 @@ if (!class_exists('EIO_Menu_Manager')):
  *
  * @class      EIO_Menu_Manager
  * @category   Manager Class
- * @version    1.0.0
+ * @version    1.0.1
  * @since      1.0.0
  * @author     Nialto Services
  * @copyright  2015 Nialto Services
@@ -64,6 +64,8 @@ final class EIO_Menu_Manager {
 	 */
 	private function __construct() {
 		add_action('admin_menu', array($this, 'admin_menu'));
+		
+		$this->check_report_download();
 	}
 
 	/**
@@ -116,38 +118,109 @@ final class EIO_Menu_Manager {
 	public function extract_menu_page() {
 		if (false === empty($_POST['eio_connector']) && false === empty($_POST['eio_extraction_url']) && false === empty($_POST['eio_extract_nonce']) && filter_var($_POST['eio_extraction_url'], FILTER_VALIDATE_URL) && false === is_null(EIO()->import_io) && wp_verify_nonce($_POST['eio_extract_nonce'], 'eio_extract')) {
 			$extractor = new EIO_Extractor($_POST['eio_connector']);
-			$extractor->build_post($_POST['eio_extraction_url'], function($status, $param) {
-				$error = null;
+			
+			if ('Extract Data' === $_POST['submit']) {
+				$extractor->build_post($_POST['eio_extraction_url'], function($status, $param) {
+					$error = null;
+					
+					switch ($status) {
+						case EIO_Extractor::POST_INSERT_FAILED:
+							$error = sprintf(
+								__('Oops! Something went wrong extracting data from the URL:<br /><strong>%s</strong>', 'extrator-io'),
+								$_POST['eio_extraction_url']
+							);
+							break;
+						
+						case EIO_Extractor::EXTRACTED_DATA_NULL:
+						case EIO_Extractor::EXTRACTION_RESULTS_NULL:
+							$error = sprintf(
+								__('No data could be extracted from the URL:<br /><strong>%s</strong><br /><br />Make sure you choose the correct connector that matches up to the URL.', 'extractor-io'),
+								$_POST['eio_extraction_url']
+							);
+							break;
+						
+						case EIO_Extractor::POST_EXTRACTED:
+							eio_safe_redirect(get_edit_post_link($param));
+							break;
+					}
+					
+					if (false === is_null($error)) {
+						ob_start();
+						
+						include(eio_get_plugin_dir('templates/admin/eio-admin-page-extract-error.php'));
+						
+						die(ob_get_clean());
+					}
+				});
+			} else if ('Generate Report' === $_POST['submit']) {
+				global $eio_report_data;
+				$eio_report_data = array(
+					'site_url' => get_site_url(),
+					'extraction_url' => $_POST['eio_extraction_url'],
+					'plugin_data' => EIO()->plugin_data(),
+					'connector_mapping' => EIO()->connector_mappings->get_option($_POST['eio_connector']),
+					'data' => array()
+				);
 				
-				switch ($status) {
-					case EIO_Extractor::EXTRACTION_FAILED:
-					case EIO_Extractor::POST_INSERT_FAILED:
-						$error = sprintf(
-							__('Oops! Something went wrong and no data could be extracted from the URL:<br /><strong>%s</strong>', 'extrator-io'),
-							$_POST['eio_extraction_url']
-						);
-						break;
+				$extractor->build_post($_POST['eio_extraction_url'], function($status, $param) {
+					global $eio_report_data;
 					
-					case EIO_Extractor::EXTRACTED_DATA_NULL:
-						$error = sprintf(
-							__('No data could be extracted from the URL:<br /><strong>%s</strong><br /><br />Make sure you choose the correct connector that matches up to the URL.', 'extractor-io'),
-							$_POST['eio_extraction_url']
-						);
-						break;
-					
-					case EIO_Extractor::POST_EXTRACTED:
-						eio_safe_redirect(get_edit_post_link($param));
-						break;
-				}
+					switch ($status) {
+						case EIO_Extractor::EXTRACTED_DATA_NULL:
+							$eio_report_data['data'][] = array(
+								'type' => 'error',
+								'message' => 'The extracted data was null. Possibly an Import IO error.'
+							);
+							break;
+						
+						case EIO_Extractor::EXTRACTION_RESULTS_NULL:
+							$eio_report_data['data'][] = array(
+								'type' => 'error',
+								'message' => 'There were no results in the data extracted from the URL.'
+							);
+							break;
+						
+						case EIO_Extractor::POST_INSERT_FAILED:
+							$eio_report_data['data'][] = array(
+								'type' => 'error',
+								'message' => 'Failed to create/insert the WordPress post object.'
+							);
+							break;
+						
+						case EIO_Extractor::POST_EXTRACTED:
+							$eio_report_data['data'][] = array(
+								'type' => 'info',
+								'message' => 'The extracted data was successfully parsed into a post object.',
+								'post_id' => $param
+							);
+							break;
+						
+						case EIO_Extractor::REPORT_DATA_EXTRACTED:
+							$eio_report_data['data'][] = array(
+								'type' => 'info',
+								'message' => 'Data was successfully extracted using Import IO.',
+								'extracted_data' => $param
+							);
+							break;
+						
+						case EIO_Extractor::REPORT_POST_UPDATED:
+							$eio_report_data['data'][] = array(
+								'type' => 'info',
+								'message' => 'The WordPress post object was successfully created/updated.',
+								'post_data' => $param
+							);
+							break;
+					}
+				}, true);
 				
-				if (false === is_null($error)) {
-					ob_start();
-					
-					include(eio_get_plugin_dir('templates/admin/eio-admin-page-extract-error.php'));
-					
-					die(ob_get_clean());
-				}
-			});
+				$report_id = uniqid();
+				
+				set_transient('eio_report_' . $report_id, $eio_report_data, HOUR_IN_SECONDS);
+				
+				unset($eio_report_data);
+				
+				include(eio_get_plugin_dir('templates/admin/eio-admin-page-report-data.php'));
+			}
 		} else {
 			$connectors = null;
 			
@@ -212,6 +285,41 @@ final class EIO_Menu_Manager {
 			}
 			
 			include(eio_get_plugin_dir('templates/admin/eio-admin-page-settings.php'));
+		}
+	}
+	
+	/**
+	 * Download a report
+	 *
+	 * Download a stored report if a report id has been specified.
+	 *
+	 * @access private
+	 * @since 1.0.1
+	 */
+	private function check_report_download() {
+		$eio_download_report = $_GET['eio_download_report'];
+		if (is_string($eio_download_report) && false === empty($eio_download_report)) {
+			$report = get_transient('eio_report_' . esc_attr($eio_download_report));
+			
+			if (is_array($report)) {
+				$report = json_encode($report);
+				$report = base64_encode($report);
+				$report = chunk_split($report);
+				
+				$report_filename = strtolower(get_bloginfo('name'));
+				
+				foreach (str_split("!@£$%^&*()+-={}[]:\"|;'\\<>?,./ ") as $symbol) {
+					$report_filename = str_replace($symbol, '_', $report_filename);
+				}
+				
+				$report_filename = preg_replace('/_+/', '_', $report_filename);
+				$report_filename .= '.eiodat';
+				
+				header('Content-Type: application/octet-stream; name="' . $report_filename .'"');
+				header('Content-Disposition: attachment; filename="' . $report_filename . '"');
+				
+				die($report);
+			}
 		}
 	}
 }
