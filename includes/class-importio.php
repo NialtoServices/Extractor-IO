@@ -65,12 +65,28 @@ class ImportIO {
 	 * @since 1.0.1
 	 */
 	public function __construct($user_guid, $api_key) {
-		if (is_null($user_guid) || empty($user_guid)) {
-			throw new BadFunctionCallException('You must provide the GUID of the user account.');
+		if (false === is_string($user_guid) || empty($user_guid)) {
+			throw new BadFunctionCallException(
+				__('You must provide a User ID.', 'extractor-io')
+			);
 		}
 		
-		if (is_null($api_key) || empty($api_key)) {
-			throw new BadFunctionCallException('You must provide an API Key.');
+		if (false === is_string($api_key) || empty($api_key)) {
+			throw new BadFunctionCallException(
+				__('You must provide an API Key.', 'extractor-io')
+			);
+		}
+		
+		if (1 !== preg_match('/^[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+$/', $user_guid)) {
+			throw new BadFunctionCallException(
+				__('The User ID is not formatted correctly.', 'extractor-io')
+			);			
+		}
+		
+		if (false === base64_decode($api_key)) {
+			throw new BadFunctionCallException(
+				__('The API Key is not formatted correctly.', 'extractor-io')
+			);			
 		}
 		
 		$this->user_guid = $user_guid;
