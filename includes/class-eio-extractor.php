@@ -25,14 +25,14 @@ if (!class_exists('EIO_Extractor')):
  */
 class EIO_Extractor {
 	/**
-	 * Extraction failed.
-	 */
-	const EXTRACTION_FAILED = 1;
-	
-	/**
 	 * The extracted data was null.
 	 */
-	const EXTRACTED_DATA_NULL = 2;
+	const EXTRACTED_DATA_NULL = 1;
+	
+	/**
+	 * The extracted data's results were null.
+	 */
+	const EXTRACTION_RESULTS_NULL = 2;
 	
 	/**
 	 * Failed to insert WordPress post.
@@ -43,6 +43,16 @@ class EIO_Extractor {
 	 * WordPress post inserted.
 	 */
 	const POST_EXTRACTED = 4;
+	
+	/**
+	 * Report Mode data extracted.
+	 */
+	const REPORT_DATA_EXTRACTED = 10;
+	
+	/**
+	 * Report Mode post updated.
+	 */
+	const REPORT_POST_UPDATED = 11;
 	
 	/**
 	 * The GUID of the connector to use when extracting data.
@@ -105,9 +115,15 @@ class EIO_Extractor {
 	 * This will extract data from the specified URL,
 	 * then parse it into a WordPress post.
 	 *
-	 * @param array $extracted_data An array containing the extracted data.
+	 * In report mode, the extracted and parsed data is returned
+	 * via the callback. When the extraction completes all media
+	 * associated with the post (including the post itself) is deleted.
+	 *
+	 * @param string $url The URL to extract data from.
+	 * @param function $callback The function to use as a callback whilst extracting data.
+	 * @param boolean $report_mode Whether or not to use report mode.
 	 */
-	public function build_post($url, $callback = null) {
+	public function build_post($url, $callback = null, $report_mode = false) {
 		if (false === is_string($url) || empty($url) || false === filter_var($_POST['eio_extraction_url'], FILTER_VALIDATE_URL)) {
 			throw new BadFunctionCallException('You must provide a valid URL.');
 		}
@@ -120,29 +136,35 @@ class EIO_Extractor {
 		
 		if (is_null($extracted_data) || false === is_array($extracted_data)) {
 			if (false === is_null($callback)) {
-				$callback(self::EXTRACTION_FAILED, null);
-			}
-			
-			return false;
-		}
-		
-		if (1 > count($extracted_data['results'])) {
-			if (false === is_null($callback)) {
 				$callback(self::EXTRACTED_DATA_NULL, null);
 			}
 			
 			return false;
 		}
 		
+		if ($report_mode && false === is_null($callback)) {
+			$callback(self::REPORT_DATA_EXTRACTED, $extracted_data);
+		}
+		
+		if (1 > count($extracted_data['results'])) {
+			if (false === is_null($callback)) {
+				$callback(self::EXTRACTION_RESULTS_NULL, null);
+			}
+			
+			return false;
+		}
+		
 		foreach ($extracted_data['results'] as $result) {
-			$post_id = wp_insert_post(array(
+			$post_data = array(
 				'post_status' => 'draft',
 				'post_title' => __('Extractor IO - Currently Importing', 'extractor-io'),
 				'post_content' => sprintf(
 					__('This post is currently being imported by the Extractor IO plugin. It should be finished shortly. You can safely delete this post if Extractor IO failed to extract data from:<br /><strong>%s</strong>', 'extractor-io'),
 					$url
 				)
-			));
+			);
+			
+			$post_id = wp_insert_post($post_data);
 			
 			if (0 === $post_id) {
 				if (false === is_null($callback)) {
@@ -152,14 +174,15 @@ class EIO_Extractor {
 				return false;
 			}
 			
-			$post_data = array(
+			if ($report_mode && false === is_null($callback)) {
+				$callback(self::REPORT_POST_UPDATED, $post_data);
+			}
+			
+			$post_data = array_merge($post_data, array(
 				'ID' => $post_id,
-				'post_status' => 'draft',
 				'post_title' => '',
 				'post_content' => ''
-			);
-			
-			
+			));
 			
 			foreach ($result as $key => $value) {
 				$type = null;
@@ -242,6 +265,22 @@ class EIO_Extractor {
 				}
 			
 				return false;
+			}
+			
+			if ($report_mode) {
+				$children = get_children(array(
+					'post_parent' => $post_id
+				));
+				
+				foreach ($children as $child) {
+					wp_delete_attachment($child->ID, true);
+				}
+				
+				wp_delete_post($post_id, true);
+				
+				if (false === is_null($callback)) {
+					$callback(self::REPORT_POST_UPDATED, $post_data);
+				}
 			}
 			
 			if (false === is_null($callback)) {
