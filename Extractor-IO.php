@@ -19,6 +19,7 @@ require_once('includes/eio-functions.php');
 require_once('includes/class-importio.php');
 require_once('includes/class-eio-extractor.php');
 require_once('includes/class-eio-options-manager.php');
+require_once('includes/class-eio-notice-manager.php');
 require_once('includes/class-eio-menu-manager.php');
 require_once('includes/class-eio-settings-manager.php');
 

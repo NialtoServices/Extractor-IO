@@ -149,4 +149,38 @@ if (!function_exists('eio_safe_redirect')) {
 	}
 }
 
+if (!function_exists('eio_add_updated_notice')) {
+  /**
+   * Add an updated notice
+   *
+   * Add a notice about something that was updated or successful.
+   *
+   * @package ExtractorIO
+   * @subpackage Functions
+   * @access public
+   * @since 2.0.0
+   * @return boolean Whether or not the notice has been logged.
+   */
+  function eio_add_updated_notice($message) {
+    EIO_Notice_Manager::instance()->add_notice($message, true);
+  }
+}
+
+if (!function_exists('eio_add_error_notice')) {
+  /**
+   * Add an error notice
+   *
+   * Add a notice about something that went wrong or was unsuccessful.
+   *
+   * @package ExtractorIO
+   * @subpackage Functions
+   * @access public
+   * @since 2.0.0
+   * @return boolean Whether or not the notice has been logged.
+   */
+  function eio_add_error_notice($message) {
+    EIO_Notice_Manager::instance()->add_notice($message, false);
+  }
+}
+
 ?>
