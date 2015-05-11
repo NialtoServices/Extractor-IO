@@ -154,6 +154,20 @@ class ExtractorIO {
 	}
 	
 	/**
+	 * Get data about the current plugin.
+	 *
+	 * This will fetch information about the current plugin
+	 * from WordPress.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 * @return array The plugin's data.
+	 */
+	public function plugin_data() {
+		return get_plugin_data(__FILE__);
+	}
+	
+	/**
 	 * After settings updated
 	 *
 	 * After the Extractor IO settings have been updated,
