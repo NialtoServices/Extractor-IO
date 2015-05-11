@@ -13,15 +13,21 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
+$connection_class = $username ? 'updated' : 'error';
+$connection_style = implode(';', array('padding: 9px', 'margin-bottom: 40px'));
+$connection_message = $username ? sprintf(__('Connected to Import IO as <strong>%s</strong>', 'extractor-io'), $username) : __('Not connected to Import IO', 'extractor-io');
+
+$connection_status = '<div class="' . $connection_class . '" style="' . $connection_style . '">' . $connection_message . '</div>';
+
 ?>
 
-<h2>Extractor IO - Settings</h2>
 <div class="wrap">
-	<?php if ($username): ?>
-	<div class="updated" style="padding: 9px; margin-bottom: 40px;"><?php echo __('Connected to Import IO as', 'extractor-io') . ' <strong>' . $username . '</strong>'; ?></div>
-	<?php else: ?>
-	<div class="error" style="padding: 9px; margin-bottom: 40px;"><?php echo __('Not connected to Import IO', 'extractor-io'); ?></div>
-	<?php endif; ?>
+	<?php echo $connection_status; ?>
+</div>
+
+<h2>Extractor IO - Settings</h2>
+<br />
+<div class="wrap">
 	<form method="post" class="eio-settings-form">
 		<?php wp_nonce_field('eio_update_settings', 'eio_settings_nonce'); ?>
 		<h3>Import IO</h3>
