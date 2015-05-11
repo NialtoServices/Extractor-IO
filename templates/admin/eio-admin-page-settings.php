@@ -60,7 +60,7 @@ $connection_status = '<div class="' . $connection_class . '" style="' . $connect
 			<?php $connectors_table->display(); ?>
 		</div>
 		<?php endif; ?>
-		<?php submit_button('Update Settings'); ?>
+		<input type="submit" name="submit" id="submit" class="button button-primary" value="Save Settings">
 	</form>
 </div>
 	
