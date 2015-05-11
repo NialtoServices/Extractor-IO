@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 <?php if (0 < count($connectors)): ?>
 <p><?php _e('Fill in the form below to use this extractor.', 'extractor-io'); ?></p>
 <div class="wrap">
-	<form method="post" class="eio-settings-form">
+	<form method="post" class="eio-extraction-form">
 		<?php wp_nonce_field('eio_extract', 'eio_extract_nonce'); ?>
 		<table class="form-table">
 			<tbody>
@@ -33,6 +33,7 @@ if (!defined('ABSPATH')) {
 							<?php endforeach; ?>
 						</select>
 					</td>
+				</tr>
 				<tr>
 					<th scope="row">Extraction URL</th>
 					<td>
@@ -41,7 +42,10 @@ if (!defined('ABSPATH')) {
 				</tr>
 			</tbody>
 		</table>
-		<?php submit_button('Extract Data'); ?>
+		<p class="submit">
+			<input type="submit" name="submit" id="submit" class="button button-primary" value="Extract Data">&nbsp;
+			<input type="submit" name="submit" id="submit" class="button" value="Generate Report">
+		</p>
 	</form>
 </div>
 <?php elseif (EIO()->import_io): ?>
