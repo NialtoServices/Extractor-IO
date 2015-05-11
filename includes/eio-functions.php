@@ -135,7 +135,7 @@ if (!function_exists('eio_safe_redirect')) {
 	 * @since 2.0.0
 	 */
 	function eio_safe_redirect($url) {
-		if (is_null($url) || false === filter_var($url, FILTER_VALIDATE_URL)) {
+		if (false === is_string($url)) {
 			throw new BadFunctionCallException('The specified URL was invalid.');
 		}
 		
