@@ -154,36 +154,36 @@ class EIO_Extractor {
 			return false;
 		}
 		
+		$post_data = array(
+			'post_status' => 'draft',
+			'post_title' => __('Extractor IO - Currently Importing', 'extractor-io'),
+			'post_content' => sprintf(
+				__('This post is currently being imported by the Extractor IO plugin. It should be finished shortly. You can safely delete this post if Extractor IO failed to extract data from:<br /><strong>%s</strong>', 'extractor-io'),
+				$url
+			)
+		);
+		
+		$post_id = wp_insert_post($post_data);
+
+		if (0 === $post_id) {
+			if (false === is_null($callback)) {
+				$callback(self::POST_INSERT_FAILED, null);
+			}
+		
+			return false;
+		}
+		
+		if ($report_mode && false === is_null($callback)) {
+			$callback(self::REPORT_POST_UPDATED, $post_data);
+		}
+
+		$post_data = array(
+			'ID' => $post_id,
+			'post_title' => '',
+			'post_content' => ''
+		);
+
 		foreach ($extracted_data['results'] as $result) {
-			$post_data = array(
-				'post_status' => 'draft',
-				'post_title' => __('Extractor IO - Currently Importing', 'extractor-io'),
-				'post_content' => sprintf(
-					__('This post is currently being imported by the Extractor IO plugin. It should be finished shortly. You can safely delete this post if Extractor IO failed to extract data from:<br /><strong>%s</strong>', 'extractor-io'),
-					$url
-				)
-			);
-			
-			$post_id = wp_insert_post($post_data);
-			
-			if (0 === $post_id) {
-				if (false === is_null($callback)) {
-					$callback(self::POST_INSERT_FAILED, null);
-				}
-			
-				return false;
-			}
-			
-			if ($report_mode && false === is_null($callback)) {
-				$callback(self::REPORT_POST_UPDATED, $post_data);
-			}
-			
-			$post_data = array_merge($post_data, array(
-				'ID' => $post_id,
-				'post_title' => '',
-				'post_content' => ''
-			));
-			
 			foreach ($result as $key => $value) {
 				$type = null;
 				
