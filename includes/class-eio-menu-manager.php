@@ -14,7 +14,7 @@ if (!class_exists('EIO_Menu_Manager')):
  *
  * @class      EIO_Menu_Manager
  * @category   Manager Class
- * @version    1.0.1
+ * @version    1.0.2
  * @since      1.0.0
  * @author     Nialto Services
  * @copyright  2015 Nialto Services
@@ -89,6 +89,17 @@ final class EIO_Menu_Manager {
 				array($this, 'extract_menu_page'),
 				eio_get_plugin_url('assets/images/Extractor-IO.png')
 			);
+
+			if (defined('EIO_ENABLE_REPORT_PARSING') && EIO_ENABLE_REPORT_PARSING) {
+				add_submenu_page(
+					'eio-extract',
+					__('Extractor IO - Parse Report', 'extractor-io'),
+					__('Parse Report', 'extractor-io'),
+					'edit_posts',
+					'eio-parse-report',
+					array($this, 'parse_report_menu_page')
+				);
+			}
 			
 			if (current_user_can('activate_plugins')) {
 				add_submenu_page(
@@ -99,7 +110,9 @@ final class EIO_Menu_Manager {
 					'eio-settings',
 					array($this, 'settings_menu_page')
 				);
-				
+			}
+
+			if (1 < count($submenu['eio-extract'])) {
 				$submenu['eio-extract'][0][0] = __('Extract', 'extractor-io');
 			}
 		}
@@ -230,6 +243,152 @@ final class EIO_Menu_Manager {
 			
 			include(eio_get_plugin_dir('templates/admin/eio-admin-page-extract.php'));
 		}
+	}
+
+	/**
+	 * Content for the parse report page
+	 *
+	 * Called when we can print out the html contents of the
+	 * parse report admin page.
+	 *
+	 * @access public
+	 * @since 1.0.2
+	 * @internal
+	 */
+	public function parse_report_menu_page() {
+		$report = null;
+		$event_log_total_items = 0;
+		$basic_info_table = null;
+		$plugin_info_table = null;
+		$connector_mappings_table = null;
+		$event_log_table = null;
+
+		if ('parse_report' === $_POST['eio_action'] && false === empty($_FILES['report']['name'])) {
+			$report = file_get_contents($_FILES['report']['tmp_name']);
+			$report = base64_decode($report);
+			$report = json_decode($report, true);
+
+			include_once(eio_get_plugin_dir('includes/class-eio-basic-table.php'));
+
+			$basic_info_table = new EIO_Basic_Table(
+				array(
+					array(
+						'slug' => 'key',
+						'name' => 'Key'
+					),
+					array(
+						'slug' => 'value',
+						'name' => 'Value'
+					)
+				),
+				array(
+					array(
+						'key' => 'Site URL',
+						'value' => $report['site_url']
+					),
+					array(
+						'key' => 'Extraction URL',
+						'value' => $report['extraction_url']
+					)
+				)
+			);
+
+			$basic_info_table->prepare_items();
+
+			$plugin_info = array();
+
+			foreach ($report['plugin_data'] as $key => $value) {
+				if ('Version' !== $key) {
+					continue;
+				}
+
+				$plugin_info[] = array(
+					'key' => $key,
+					'value' => esc_attr($value)
+				);
+			}
+
+			$plugin_info_table = new EIO_Basic_Table(
+				array(
+					array(
+						'slug' => 'key',
+						'name' => 'Key'
+					),
+					array(
+						'slug' => 'value',
+						'name' => 'Value'
+					)
+				),
+				$plugin_info
+			);
+
+			$plugin_info_table->prepare_items();
+
+			$connector_mappings = array();
+
+			foreach ($report['connector_mapping'] as $field => $import_to) {
+				$connector_mappings[] = array(
+					'field' => eio_prettify_name($field) . ' (' . $field . ')',
+					'import_to' => eio_prettify_name($import_to)
+				);
+			}
+
+			$connector_mappings_table = new EIO_Basic_Table(
+				array(
+					array(
+						'slug' => 'field',
+						'name' => 'Field'
+					),
+					array(
+						'slug' => 'import_to',
+						'name' => 'Import To'
+					)
+				),
+				$connector_mappings
+			);
+
+			$connector_mappings_table->prepare_items();
+
+			$event_log = array();
+
+			foreach ($report['data'] as $index => $event) {
+				$actions = null;
+
+				if (array_key_exists('extracted_data', $event)) {
+					$actions = '<a href="?page=eio-parse-report">' . __('View Extracted Data', 'extractor-io') . '</a>';
+				}
+
+				$event_log[] = array(
+					'type' => eio_prettify_name($event['type']),
+					'message' => esc_attr($event['message']),
+					'actions' => $actions
+				);
+			}
+
+			$event_log_table = new EIO_Basic_Table(
+				array(
+					array(
+						'slug' => 'type',
+						'name' => 'Type'
+					),
+					array(
+						'slug' => 'message',
+						'name' => 'Message'
+					),
+					array(
+						'slug' => 'actions',
+						'name' => 'Actions'
+					)
+				),
+				$event_log
+			);
+
+			$event_log_table->prepare_items();
+
+			$event_log_total_items = count($event_log);
+		}
+
+		include(eio_get_plugin_dir('templates/admin/eio-admin-page-parse-report.php'));
 	}
 
 	/**
