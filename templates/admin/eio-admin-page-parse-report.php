@@ -15,6 +15,10 @@ if (!defined('ABSPATH')) {
 
 if ($report):
 
+if (false === empty($thickbox_content)) {
+	add_thickbox();
+}
+
 ?>
 
 <h3>URLs</h3>
@@ -46,6 +50,8 @@ if ($report):
   <div id="icon-users" class="icon32"></div>
   <?php $event_log_table->display(); ?>
 </div>
+
+<?php echo $thickbox_content; ?>
 
 <?php else: ?>
 

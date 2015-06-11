@@ -62,15 +62,8 @@ if (!function_exists('eio_get_plugin_dir')) {
 	 * @param $path The path to append to the root directory.
 	 * @return string The root path (optionally with the $plugin variable appended).
 	 */
-	function eio_get_plugin_dir($path = '') {
-		$plugin_basedir = preg_split('/\//', plugin_basename(__FILE__));
-		$plugin_basedir = $plugin_basedir[0];
-
-		if (empty($path) || '/' !== substr($path, 0, 1)) {
-			$plugin_basedir .= '/';
-		}
-
-		return ABSPATH . 'wp-content/plugins/' . $plugin_basedir . $path;
+	function eio_get_plugin_dir($path = null) {
+		return EIO()->plugin_path($path);
 	}
 }
 
@@ -88,16 +81,8 @@ if (!function_exists('eio_get_plugin_url')) {
 	 * @param $path The path to append to the root URL.
 	 * @return string The root URL (optionally with the $plugin variable appended).
 	 */
-	function eio_get_plugin_url($path = '') {
-		$plugin_basedir = preg_split('/\//', plugin_basename(__FILE__));
-		$plugin_basedir = $plugin_basedir[0];
-
-		if (empty($path) || '/' !== substr($path, 0, 1)) {
-			$plugin_basedir .= '/';
-		}
-
-
-		return get_site_url() . '/wp-content/plugins/' . $plugin_basedir . $path;
+	function eio_get_plugin_url($path = null) {
+		return EIO()->plugin_url($path);
 	}
 }
 

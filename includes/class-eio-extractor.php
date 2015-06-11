@@ -45,6 +45,11 @@ class EIO_Extractor {
 	const POST_EXTRACTED = 4;
 	
 	/**
+   * The connector mapping was null.
+   */
+  const CONNECTOR_MAPPING_NULL = 5;
+	
+	/**
 	 * Report Mode data extracted.
 	 */
 	const REPORT_DATA_EXTRACTED = 10;
@@ -55,43 +60,6 @@ class EIO_Extractor {
 	const REPORT_POST_UPDATED = 11;
 	
 	/**
-	 * The GUID of the connector to use when extracting data.
-	 *
-	 * @var array
-	 * @access private
-	 * @since 1.0.0
-	 */
-	private $connector_guid = null;
-	
-	/**
-	 * The array of mapping data for the connector.
-	 *
-	 * @var array
-	 * @access private
-	 * @since 1.0.0
-	 */
-	private $mapping = null;
-	
-	/**
-	 * Setup an instance of the EIO_Extractor class.
-	 *
-	 * Setup an instance of this class with the specified
-	 * connector.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 * @param array $connector The connector this extractor uses.
-	 */
-	public function __construct($connector_guid) {
-		if (false === is_string($connector_guid) || empty($connector_guid)) {
-			throw new BadFunctionCallException('You must provide a valid connector GUID.');
-		}
-		
-		$this->connector_guid = $connector_guid;
-		$this->mapping = EIO()->connector_mappings->get_option($connector_guid);
-	}
-	
-	/**
 	 * Extract data from a URL
 	 *
 	 * Using Import IO, extract data from the specified URL.
@@ -99,11 +67,16 @@ class EIO_Extractor {
 	 * @access public
 	 * @since 1.0.0
 	 * @param string $url The URL data should be extracted from.
+	 * @param string $connector_guid The connector to use when extracting data.
 	 * @return array|null The extracted data (if successful) or null (if unsuccessful)
 	 */
-	public function extract_data($url) {
+	public function extract_data($url, $connector_guid = null) {
+		if (false === is_string($connector_guid) || empty($connector_guid)) {
+    	throw new BadFunctionCallException('You must provide a Connector GUID to use when extracting data.');
+  	}
+  	
 		if (EIO()->import_io) {
-			return EIO()->import_io->extractData($this->connector_guid, $url);
+			return EIO()->import_io->extractData($connector_guid, $url);
 		}
 		
 		return null;
@@ -120,11 +93,13 @@ class EIO_Extractor {
 	 * associated with the post (including the post itself) is deleted.
 	 *
 	 * @param string $url The URL to extract data from.
+	 * @param string $connector_guid The GUID of the connector to use when extracting data.
 	 * @param function $callback The function to use as a callback whilst extracting data.
 	 * @param boolean $report_mode Whether or not to use report mode.
+	 * @return boolean Whether or not the data was successfully parsed.
 	 */
-	public function build_post($url, $callback = null, $report_mode = false) {
-		if (false === is_string($url) || empty($url) || false === filter_var($_POST['eio_extraction_url'], FILTER_VALIDATE_URL)) {
+  public function build_post_url($url, $connector_guid, $callback = null, $report_mode = false) {
+    if (false === is_string($url) || empty($url) || false === filter_var($_POST['eio_extraction_url'], FILTER_VALIDATE_URL)) {
 			throw new BadFunctionCallException('You must provide a valid URL.');
 		}
 		
@@ -132,9 +107,28 @@ class EIO_Extractor {
 			throw new BadFunctionCallException('You must provide a valid closure or a null callback.');
 		}
 		
-		$extracted_data = $this->extract_data($url);
+		$connector_mapping = EIO()->connector_mappings->get_option($connector_guid);
 		
-		if (is_null($extracted_data) || false === is_array($extracted_data)) {
+		return $this->build_post($this->extract_data($url, $connector_guid), $connector_mapping, $callback, $report_mode);
+  }
+	
+	/**
+	 * Build post from extracted data.
+	 *
+	 * This will parse the specified data into a WordPress post.
+	 *
+	 * In report mode, the extracted and parsed data is returned
+	 * via the callback. When the extraction completes all media
+	 * associated with the post (including the post itself) is deleted.
+	 *
+	 * @param array $extracted_data The data to parse into a post.
+	 * @param array $connector_mapping The mapping of where the extracted data should be imported to.
+	 * @param function $callback The function to use as a callback whilst extracting data.
+	 * @param boolean $report_mode Whether or not to use report mode.
+	 * @return boolean Whether or not the data was successfully parsed.
+	 */
+	public function build_post($extracted_data, $connector_mapping, $callback = null, $report_mode = false) {
+  	if (is_null($extracted_data) || false === is_array($extracted_data)) {
 			if (false === is_null($callback)) {
 				$callback(self::EXTRACTED_DATA_NULL, null);
 			}
@@ -142,6 +136,14 @@ class EIO_Extractor {
 			return false;
 		}
 		
+		if (is_null($connector_mapping) || false === is_array($connector_mapping)) {
+    	if (false === is_null($callback)) {
+      	$callback(self::CONNECTOR_MAPPING_NULL, null);
+    	}
+    	
+    	return false;
+  	}
+  	
 		if ($report_mode && false === is_null($callback)) {
 			$callback(self::REPORT_DATA_EXTRACTED, $extracted_data);
 		}
@@ -164,7 +166,7 @@ class EIO_Extractor {
 		);
 		
 		$post_id = wp_insert_post($post_data);
-
+		
 		if (0 === $post_id) {
 			if (false === is_null($callback)) {
 				$callback(self::POST_INSERT_FAILED, null);
@@ -198,7 +200,7 @@ class EIO_Extractor {
 					$value = array($value);
 				}
 				
-				switch ($this->mapping[$key]) {
+				switch ($connector_mapping[$key]) {
 					case 'post_title':
 						if ('STRING' === $type) {
 							foreach ($value as $title) {
@@ -256,36 +258,36 @@ class EIO_Extractor {
 						break;
 				}
 			}
-			
-			if (0 === wp_update_post($post_data)) {
-				wp_delete_post($post_id, true);
-				
-				if (false === is_null($callback)) {
-					$callback(self::POST_INSERT_FAILED, null);
-				}
-			
-				return false;
-			}
-			
-			if ($report_mode) {
-				$children = get_children(array(
-					'post_parent' => $post_id
-				));
-				
-				foreach ($children as $child) {
-					wp_delete_attachment($child->ID, true);
-				}
-				
-				wp_delete_post($post_id, true);
-				
-				if (false === is_null($callback)) {
-					$callback(self::REPORT_POST_UPDATED, $post_data);
-				}
-			}
+		}
+		
+		if (0 === wp_update_post($post_data)) {
+			wp_delete_post($post_id, true);
 			
 			if (false === is_null($callback)) {
-				$callback(self::POST_EXTRACTED, $post_id);
+				$callback(self::POST_INSERT_FAILED, null);
 			}
+		
+			return false;
+		}
+		
+		if ($report_mode) {
+			$children = get_children(array(
+				'post_parent' => $post_id
+			));
+			
+			foreach ($children as $child) {
+				wp_delete_attachment($child->ID, true);
+			}
+			
+			wp_delete_post($post_id, true);
+			
+			if (false === is_null($callback)) {
+				$callback(self::REPORT_POST_UPDATED, $post_data);
+			}
+		}
+		
+		if (false === is_null($callback)) {
+			$callback(self::POST_EXTRACTED, $post_id);
 		}
 		
 		return true;

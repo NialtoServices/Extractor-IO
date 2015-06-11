@@ -107,11 +107,11 @@ class ExtractorIO {
    * @internal
    */
 	private function __construct() {
-		$this->options = new EIO_Options_Manager('eio_options');
+    $this->options = new EIO_Options_Manager('eio_options');
 		$this->connector_mappings = new EIO_Options_Manager('eio_connector_mappings');
-		$this->setup_import_io();
+    $this->setup_import_io();
 		
-		add_action('eio_settings_updated', array($this, 'after_settings_updated'));
+    add_action('eio_settings_updated', array($this, 'after_settings_updated'));
     add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
   }
 
@@ -124,7 +124,8 @@ class ExtractorIO {
    * @since 1.0.0
    */
   public function admin_enqueue_scripts() {
-    wp_enqueue_style('eio-admin-style', $this->plugin_url() . '/assets/css/admin-style.css');
+    wp_enqueue_style('eio-admin-style', $this->plugin_url('/assets/css/eio-admin.css'));
+    wp_enqueue_script('eio-admin-script', $this->plugin_url('/assets/js/eio-admin.js'));
   }
 
   /**
@@ -134,10 +135,21 @@ class ExtractorIO {
 	 *
 	 * @access public
 	 * @since 1.0.0
+	 * @param string $extension The string to append to the path.
 	 * @return string The URL to the plugin's directory.
 	 */
-	public function plugin_url() {
-		return untrailingslashit(plugin_dir_url(__FILE__));
+	public function plugin_url($extension = null) {
+		$path = untrailingslashit(plugin_dir_url(__FILE__));
+		
+		if (false === empty($extension)) {
+			if ('/' !== substr($extension, 0, 1)) {
+				$path .= '/';
+			}
+			
+			$path .= $extension;
+		}
+		
+		return $path;
 	}
 
 	/**
@@ -147,10 +159,21 @@ class ExtractorIO {
 	 *
 	 * @access public
 	 * @since 1.0.0
+	 * @param string $extension The string to append to the path.
 	 * @return string The path to the plugin's directory.
 	 */
-	public function plugin_path() {
-		return untrailingslashit(plugin_dir_path(__FILE__));
+	public function plugin_path($extension = null) {
+		$path = untrailingslashit(plugin_dir_path(__FILE__));
+		
+		if (false === empty($extension)) {
+			if ('/' !== substr($extension, 0, 1)) {
+				$path .= '/';
+			}
+			
+			$path .= $extension;
+		}
+		
+		return $path;
 	}
 
 	/**

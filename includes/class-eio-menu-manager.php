@@ -130,10 +130,10 @@ final class EIO_Menu_Manager {
 	 */
 	public function extract_menu_page() {
 		if (false === empty($_POST['eio_connector']) && false === empty($_POST['eio_extraction_url']) && false === empty($_POST['eio_extract_nonce']) && filter_var($_POST['eio_extraction_url'], FILTER_VALIDATE_URL) && false === is_null(EIO()->import_io) && wp_verify_nonce($_POST['eio_extract_nonce'], 'eio_extract')) {
-			$extractor = new EIO_Extractor($_POST['eio_connector']);
+			$extractor = new EIO_Extractor();
 			
 			if ('Extract Data' === $_POST['submit']) {
-				$extractor->build_post($_POST['eio_extraction_url'], function($status, $param) {
+				$extractor->build_post_url($_POST['eio_extraction_url'], $_POST['eio_connector'], function($status, $param) {
 					$error = null;
 					
 					switch ($status) {
@@ -146,6 +146,7 @@ final class EIO_Menu_Manager {
 						
 						case EIO_Extractor::EXTRACTED_DATA_NULL:
 						case EIO_Extractor::EXTRACTION_RESULTS_NULL:
+						case EIO_Extractor::CONNECTOR_MAPPING_NULL:
 							$error = sprintf(
 								__('No data could be extracted from the URL:<br /><strong>%s</strong><br /><br />Make sure you choose the correct connector that matches up to the URL.', 'extractor-io'),
 								$_POST['eio_extraction_url']
@@ -175,7 +176,7 @@ final class EIO_Menu_Manager {
 					'data' => array()
 				);
 				
-				$extractor->build_post($_POST['eio_extraction_url'], function($status, $param) {
+				$extractor->build_post_url($_POST['eio_extraction_url'], $_POST['eio_connector'], function($status, $param) {
 					global $eio_report_data;
 					
 					switch ($status) {
@@ -192,6 +193,13 @@ final class EIO_Menu_Manager {
 								'message' => 'There were no results in the data extracted from the URL.'
 							);
 							break;
+							
+						case EIO_Extractor::CONNECTOR_MAPPING_NULL:
+						  $eio_report_data['data'][] = array(
+  						  'type' => 'error',
+  						  'message' => 'The connector mapping was null.'
+						  );
+						  break;
 						
 						case EIO_Extractor::POST_INSERT_FAILED:
 							$eio_report_data['data'][] = array(
@@ -262,6 +270,7 @@ final class EIO_Menu_Manager {
 		$plugin_info_table = null;
 		$connector_mappings_table = null;
 		$event_log_table = null;
+		$thickbox_content = '';
 
 		if ('parse_report' === $_POST['eio_action'] && false === empty($_FILES['report']['name'])) {
 			$report = file_get_contents($_FILES['report']['tmp_name']);
@@ -355,7 +364,79 @@ final class EIO_Menu_Manager {
 				$actions = null;
 
 				if (array_key_exists('extracted_data', $event)) {
-					$actions = '<a href="?page=eio-parse-report">' . __('View Extracted Data', 'extractor-io') . '</a>';
+  				$extracted_data = $event['extracted_data'];
+  				
+					$actions = '<a class="thickbox eio-extracted-data-link" rel="' . $index . '" href="#">' . __('View Extracted Data', 'extractor-io') . '</a>';
+					
+					$extraction_info_table = new EIO_Basic_Table(
+  					array(
+    					array(
+      					'slug' => 'option',
+      					'name' => 'Option'
+    					),
+    					array(
+      					'slug' => 'value',
+      					'name' => 'Value'
+    					)
+    				),
+    				array(
+      				array(
+        				'option' => 'Connector GUID',
+        				'value' => $extracted_data['connectorGuid']
+      				),
+      				array(
+        				'option' => 'Connector Version GUID',
+        				'value' => $extracted_data['connectorVersionGuid']
+      				),
+      				array(
+        				'option' => 'Page URL',
+        				'value' => $extracted_data['pageUrl']
+      				)
+    				)
+					);
+					
+					$extraction_info_table->prepare_items();
+					
+					$extracted_data_keys = array();
+					
+					foreach ($extracted_data['outputProperties'] as $property) {
+  					$extracted_data_keys[] = array(
+  					  'slug' => $property['name'],
+  					  'name' => eio_prettify_name($property['name']) . ' (' . $property['name'] . ')'
+            );
+					}
+          
+					$extracted_data_table = new EIO_Basic_Table(
+  					$extracted_data_keys,
+  					$extracted_data['results']
+					);
+					
+					$extracted_data_table->prepare_items();
+					
+					ob_start();
+					
+					?>
+					
+          <div id="eio-extracted-data-<?php echo $index; ?>" style="display:none; background-color: #f1f1f1;">
+            <div class="extracted-data-thickbox notablenavhead notablenavbottom">
+              <h3>Connector Information</h3>
+              <?php $extraction_info_table->display(); ?>
+              <br />
+              <h3>Extracted Data</h3>
+              <?php $extracted_data_table->display(); ?>
+              <br />
+              <form class="" method="post">
+                <input type="hidden" name="eio_action" value="attempt_extraction" />
+                <input type="hidden" name="extracted_data" value="<?php echo base64_encode(json_encode($extracted_data)); ?>" />
+                <input type="hidden" name="connector_mapping" value="<?php echo base64_encode(json_encode($report['connector_mapping'])); ?>" />
+                <input type="submit" value="Attempt Extraction" class="button button-primary" />
+              </form>
+					  </div>
+					</div>
+					
+					<?php
+  				
+  				$thickbox_content .= ob_get_clean();
 				}
 
 				$event_log[] = array(
@@ -386,6 +467,43 @@ final class EIO_Menu_Manager {
 			$event_log_table->prepare_items();
 
 			$event_log_total_items = count($event_log);
+		} else if ('attempt_extraction' === $_POST['eio_action'] && false === empty($_POST['extracted_data'])) {
+  		$extractor = new EIO_Extractor();
+  		
+  		$extracted_data = json_decode(base64_decode($_POST['extracted_data']), true);
+  		$connector_mapping = json_decode(base64_decode($_POST['connector_mapping']), true);
+  		
+  		$extractor->build_post($extracted_data, $connector_mapping, function($status, $param) {
+    		$error = null;
+				
+        switch ($status) {
+				  case EIO_Extractor::POST_INSERT_FAILED:
+            $error = sprintf(
+						  __('Oops! Something went wrong extracting data from that report.', 'extractor-io')
+            );
+            break;
+					
+					case EIO_Extractor::EXTRACTED_DATA_NULL:
+					case EIO_Extractor::EXTRACTION_RESULTS_NULL:
+					case EIO_Extractor::CONNECTOR_MAPPING_NULL:
+						$error = sprintf(
+							__('No data could be extracted from that report.', 'extractor-io')
+						);
+						break;
+					
+					case EIO_Extractor::POST_EXTRACTED:
+						eio_safe_redirect(get_edit_post_link($param));
+						break;
+				}
+				
+				if (false === is_null($error)) {
+					ob_start();
+					
+					include(eio_get_plugin_dir('templates/admin/eio-admin-page-extract-error.php'));
+					
+					die(ob_get_clean());
+				}
+		  });
 		}
 
 		include(eio_get_plugin_dir('templates/admin/eio-admin-page-parse-report.php'));
