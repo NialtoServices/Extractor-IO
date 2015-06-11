@@ -42,16 +42,16 @@ if (!class_exists('ExtractorIO')):
  * @subpackage 
  */
 class ExtractorIO {
-    /**
-     * The shared instance of this class.
-     *
-     * @staticvar ExtractorIO
-     * @access private
-     * @since 1.0.0
-     */
-    private static $instance = null;
+  /**
+   * The shared instance of this class.
+   *
+   * @staticvar ExtractorIO
+   * @access private
+   * @since 1.0.0
+   */
+  private static $instance = null;
     
-    /**
+  /**
 	 * The options manager for this plugin.
 	 *
 	 * @var EIO_Options_Manager
@@ -78,43 +78,56 @@ class ExtractorIO {
 	 */
 	public $import_io = null;
 
-    /**
-     * Get the shared instance
-     *
-     * Get the shared instance of this class.
-     *
-     * @access public
-     * @since 1.0.0
-     * @return ExtractorIO The instance of this class.
-     */
-    public static function instance() {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
+  /**
+   * Get the shared instance
+   *
+   * Get the shared instance of this class.
+   *
+   * @access public
+   * @since 1.0.0
+   * @return ExtractorIO The instance of this class.
+   */
+  public static function instance() {
+    if (is_null(self::$instance)) {
+      self::$instance = new self();
     }
 
-    /**
-     * Setup an instance of the ExtractorIO class.
-     *
-     * Setup an instance of the ExtractorIO class.
-     * This should only be used internally by the static
-     * instance method.
-     *
-     * @access private
-     * @since 1.0.0
-     * @internal
-     */
+    return self::$instance;
+  }
+
+  /**
+   * Setup an instance of the ExtractorIO class.
+   *
+   * Setup an instance of the ExtractorIO class.
+   * This should only be used internally by the static
+   * instance method.
+   *
+   * @access private
+   * @since 1.0.0
+   * @internal
+   */
 	private function __construct() {
 		$this->options = new EIO_Options_Manager('eio_options');
 		$this->connector_mappings = new EIO_Options_Manager('eio_connector_mappings');
 		$this->setup_import_io();
 		
 		add_action('eio_settings_updated', array($this, 'after_settings_updated'));
-    }
-    
-    /**
+    add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
+  }
+
+  /**
+   * Enqueue Admin Scripts and Styles
+   *
+   * Load the styles and scripts to be used in the admin area.
+   *
+   * @access public
+   * @since 1.0.0
+   */
+  public function admin_enqueue_scripts() {
+    wp_enqueue_style('eio-admin-style', $this->plugin_url() . '/assets/css/admin-style.css');
+  }
+
+  /**
 	 * Get plugin URL
 	 *
 	 * Get the URL to the plugin's directory.
