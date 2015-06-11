@@ -183,4 +183,25 @@ if (!function_exists('eio_add_error_notice')) {
   }
 }
 
+if (!function_exists('eio_prettify_name')) {
+	/**
+	 * Prettify Name
+	 *
+	 * Prettify a string.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 * @param string $name The name to prettify.
+	 * @return string The prettified name.
+	 */
+	function eio_prettify_name($name) {
+		$name = strtolower($name);
+		$name = str_replace('_', ' ', $name);
+		$name = str_replace('-', ' ', $name);
+		$name = ucwords($name);
+		
+		return $name;
+	}
+}
+
 ?>

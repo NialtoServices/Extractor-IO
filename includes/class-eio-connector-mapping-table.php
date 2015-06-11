@@ -75,7 +75,7 @@ final class EIO_Connector_Mapping_Table extends EIO_List_Table {
 	 * @return string The name of the field.
 	 */
 	public function column_name($field) {
-		return $this->prettify_name($field['name']);
+		return eio_prettify_name($field['name']);
 	}
 	
 	/**
@@ -165,25 +165,6 @@ final class EIO_Connector_Mapping_Table extends EIO_List_Table {
 				'total_items' => count($this->items),
 			)
 		);
-	}
-	
-	/**
-	 * Prettify Name
-	 *
-	 * Prettify a string.
-	 *
-	 * @access private
-	 * @since 1.0.0
-	 * @param string $name The name to prettify.
-	 * @return string The prettified name.
-	 */
-	public function prettify_name($name) {
-		$name = strtolower($name);
-		$name = str_replace('_', ' ', $name);
-		$name = str_replace('-', ' ', $name);
-		$name = ucwords($name);
-		
-		return $name;
 	}
 }
 
