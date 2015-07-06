@@ -100,21 +100,7 @@ final class EIO_Settings_Manager {
 	 * @since 1.0.0
 	 */
 	private function save_main_settings() {
-		$user_guid = esc_attr($_POST['eio_user_guid']);
 		$api_key = esc_attr($_POST['eio_api_key']);
-		
-		if (false !== strpos($api_key, ':')) {
-			$api_key = explode(':', $api_key);
-			$api_key = $api_key[count($api_key) - 1];
-		}
-		
-		if (false === is_string($user_guid) || empty($user_guid)) {
-			eio_add_error_notice(
-				__('You must provide a <strong>User ID</strong>', 'extractor-io')
-			);
-			
-			return;
-		}
 		
 		if (false === is_string($api_key) || empty($api_key)) {
 			eio_add_error_notice(
@@ -124,23 +110,10 @@ final class EIO_Settings_Manager {
 			return;
 		}
 		
-		$user_guid = strtolower(preg_replace('/\s+/', '', $user_guid));
 		$api_key = preg_replace('/\s+/', '', $api_key);
 		
-		if (false !== strpos($api_key, ':')) {
-			$api_key_components = explode(':', $api_key);
-			
-			if (1 !== count($api_key_components)) {
-				eio_add_error_notice(
-					__('The API Key is not formatted correctly.', 'extractor-io')
-				);
-				
-				return;
-			}
-		}
-		
 		try {
-			$import_io = new ImportIO($user_guid, $api_key);
+			$import_io = new ImportIO($api_key);
 		} catch (BadFunctionCallException $e) {
 			eio_add_error_notice($e->getMessage());
 			
@@ -151,17 +124,16 @@ final class EIO_Settings_Manager {
 		
 		if (false === is_array($user) || empty($user) || false === array_key_exists('username', $user) || false === is_string($user['username'])) {
 			eio_add_error_notice(
-				__('The User ID and or API Key were incorrect.', 'extractor-io')
+				__('The API Key was incorrect.', 'extractor-io')
 			);
 			
 			return;
 		}
 		
-		EIO()->options->update_option('user_guid', $user_guid);
 		EIO()->options->update_option('api_key', $api_key);
 
 		eio_add_updated_notice(
-			__('The <strong>User ID</strong> and <strong>API Key</strong> have been saved.', 'extractor-io')
+			__('The <strong>API Key</strong> has been saved.', 'extractor-io')
 		);
 	}
 	

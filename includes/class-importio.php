@@ -30,14 +30,6 @@ class ImportIO {
 	 * @access private
 	 */
 	private $api_url = 'https://api.import.io';
-	 
-	/**
-	 * The User's GUID
-	 *
-	 * @var string
-	 * @access private
-	 */
-	private $user_guid = null;
 	
 	/**
 	 * The API Key
@@ -63,33 +55,15 @@ class ImportIO {
 	 *
 	 * @access public
 	 * @since 1.0.1
+	 * @param string $api_key The API Key to use when communicating with Import IO's API.
 	 */
-	public function __construct($user_guid, $api_key) {
-		if (false === is_string($user_guid) || empty($user_guid)) {
-			throw new BadFunctionCallException(
-				__('You must provide a User ID.', 'extractor-io')
-			);
-		}
-		
+	public function __construct($api_key) {
 		if (false === is_string($api_key) || empty($api_key)) {
 			throw new BadFunctionCallException(
 				__('You must provide an API Key.', 'extractor-io')
 			);
 		}
 		
-		if (1 !== preg_match('/^[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+\-[a-z0-9]+$/', $user_guid)) {
-			throw new BadFunctionCallException(
-				__('The User ID is not formatted correctly.', 'extractor-io')
-			);			
-		}
-		
-		if (false === base64_decode($api_key)) {
-			throw new BadFunctionCallException(
-				__('The API Key is not formatted correctly.', 'extractor-io')
-			);			
-		}
-		
-		$this->user_guid = $user_guid;
 		$this->api_key = $api_key;
 	}
 	
@@ -105,7 +79,9 @@ class ImportIO {
 	public function current_user() {
 		$url = $this->api_url;
 		$url .= '/auth/currentuser';
-		$url .= '?_apikey=' . urlencode($this->user_guid) . ':' . urlencode($this->api_key);
+		$url .= '?_apikey=' . urlencode($this->api_key);
+		
+		return $url;
 		
 		$response = wp_remote_get($url, $this->build_wp_remote_args());
 		$response_code = wp_remote_retrieve_response_code($response);
@@ -141,7 +117,7 @@ class ImportIO {
 		while (true) {
 			$url = $this->api_url;
 			$url .= '/store/connector/_search';
-			$url .= '?_apikey=' . urlencode($this->user_guid) . ':' . urlencode($this->api_key);
+			$url .= '?_apikey=' . urlencode($this->api_key);
 			$url .= '&_page=' . $page;
 			$url .= '&_perpage=' . $per_page;
 			$url .= '&_sortDirection=' . $sort_direction;
@@ -209,7 +185,7 @@ class ImportIO {
 		
 		$url = $this->api_url;
 		$url .= '/store/connectorversion/' . $connector_version_guid . '/schema';
-		$url .= '?_apikey=' . urlencode($this->user_guid) . ':' . urlencode($this->api_key);
+		$url .= '?_apikey=' . urlencode($this->api_key);
 		
 		$response = wp_remote_get($url, $this->build_wp_remote_args());
 		$response_code = wp_remote_retrieve_response_code($response);
@@ -245,7 +221,7 @@ class ImportIO {
 		
 		$url = $this->api_url;
 		$url .= '/store/connector/' . $connector_guid . '/_query';
-		$url .= '?_apikey=' . urlencode($this->user_guid) . ':' . urlencode($this->api_key);
+		$url .= '?_apikey=' . urlencode($this->api_key);
 		
 		$headers = array(
 			'Content-Type' => 'application/json'

@@ -226,13 +226,12 @@ class ExtractorIO {
 	 * @since 1.0.0
 	 */
 	private function setup_import_io() {
-		$user_guid = $this->options->get_option('user_guid');
 		$api_key = $this->options->get_option('api_key');
 		
-		if (empty($user_guid) || empty($api_key)) {
+		if (empty($api_key)) {
 			$this->import_io = null;
 		} else {
-			$this->import_io = new ImportIO($user_guid, $api_key);
+			$this->import_io = new ImportIO($api_key);
 		}
 	}
 }

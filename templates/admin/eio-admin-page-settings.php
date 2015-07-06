@@ -36,14 +36,6 @@ $connection_status = '<div class="' . $connection_class . '" style="' . $connect
 			<tbody>
 				<tr>
 					<th scope="row">
-						<?php _e('User ID', 'extractor-io'); ?>
-					</th>
-					<td>
-						<input type="text" name="eio_user_guid" class="regular-text" value="<?php echo EIO()->options->get_option('user_guid'); ?>" />
-					</td>
-				</tr>
-				<tr>
-					<th scope="row">
 						<?php _e('API Key', 'extractor-io'); ?>
 					</th>
 					<td>
