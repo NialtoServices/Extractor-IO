@@ -103,7 +103,7 @@ final class EIO_Notice_Manager {
 		
 		foreach ($notices as $notice) {
 			$class = $notice['success'] ? 'updated' : 'error';
-			$style = implode(';', array('padding: 9px', 'margin-bottom: 40px'));
+			$style = implode(';', array('padding: 9px'));
 			$message = $notice['message'];
 			
 			echo '<div class="' . $class . '" style="' . $style . '">' . $message . '</div>';
