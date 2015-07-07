@@ -5,7 +5,7 @@
  * @author     Nialto Services
  * @package    ExtractorIO
  * @subpackage Templates/Admin
- * @version    1.0.0
+ * @version    1.0.1
  */
  
 // Ensure we are not being accessed directly.
@@ -56,6 +56,9 @@ if (false === empty($thickbox_content)) {
 <?php else: ?>
 
 <h2>Extractor IO - Parse Report</h2>
+
+<p><?php _e('You can use this feature to parse an <strong>Extractor IO</strong> report file (eiodat).', 'extractor-io'); ?></p>
+
 <form method="post" enctype="multipart/form-data">
   <input type="hidden" name="eio_action" value="parse_report" />
   <input type="file" name="report" accept=".eiodat" /><br /><br />
