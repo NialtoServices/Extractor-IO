@@ -129,10 +129,6 @@ final class EIO_Settings_Manager {
 		}
 		
 		EIO()->options->update_option('api_key', $api_key);
-
-		eio_add_updated_notice(
-			__('The <strong>API Key</strong> has been saved.', 'extractor-io')
-		);
 	}
 	
 	/**
