@@ -15,7 +15,7 @@ if (!class_exists('EIO_Options_Manager')):
  *
  * @class      EIO_Options_Manager
  * @category   Manager Class
- * @version    1.0.0
+ * @version    1.0.1
  * @since      2.0.0
  * @author     Nialto Services
  * @copyright  2015 Nialto Services
@@ -130,6 +130,46 @@ final class EIO_Options_Manager {
 		$options = get_site_option($this->options_key, array());
 
 		$options[$key] = apply_filters(eio_sanitize_key($this->options_key) . '_update_sitewide_' . eio_sanitize_key($key), $value, $this->options_key);
+
+		return update_site_option($this->options_key, $options);
+	}
+
+	/**
+	 * Delete an option
+	 *
+	 * Delete an option from the options data in the database.
+	 *
+	 * @access public
+	 * @since 1.0.1
+	 * @param string $key The option's key.
+	 * @return boolean Whether or not the delete was successful.
+	 */
+	public function delete_option($key) {
+		$options = get_option($this->options_key, array());
+
+		do_action(eio_sanitize_key($this->options_key) . '_delete_' . eio_sanitize_key($key));
+
+		unset($options[$key]);
+
+		return update_option($this->options_key, $options);
+	}
+
+	/**
+	 * Delete a site option
+	 *
+	 * Delete a sitewide option from the options data in the database.
+	 *
+	 * @access public
+	 * @since 1.0.1
+	 * @param string $key The option's key.
+	 * @return boolean Whether or not the delete was successful.
+	 */
+	public function delete_site_option($key) {
+		$options = get_option($this->options_key, array());
+
+		do_action(eio_sanitize_key($this->options_key) . '_delete_sitewide_' . eio_sanitize_key($key));
+
+		unset($options[$key]);
 
 		return update_site_option($this->options_key, $options);
 	}
