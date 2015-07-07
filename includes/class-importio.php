@@ -81,8 +81,6 @@ class ImportIO {
 		$url .= '/auth/currentuser';
 		$url .= '?_apikey=' . urlencode($this->api_key);
 		
-		return $url;
-		
 		$response = wp_remote_get($url, $this->build_wp_remote_args());
 		$response_code = wp_remote_retrieve_response_code($response);
 		
