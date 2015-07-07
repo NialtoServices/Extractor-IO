@@ -131,9 +131,10 @@ final class EIO_Menu_Manager {
 	public function extract_menu_page() {
 		if (false === empty($_POST['eio_connector']) && false === empty($_POST['eio_extraction_url']) && false === empty($_POST['eio_extract_nonce']) && filter_var($_POST['eio_extraction_url'], FILTER_VALIDATE_URL) && false === is_null(EIO()->import_io) && wp_verify_nonce($_POST['eio_extract_nonce'], 'eio_extract')) {
 			$extractor = new EIO_Extractor();
-			
+			$connector = json_decode(base64_decode($_POST['eio_connector']), true);
+
 			if ('Extract Data' === $_POST['submit']) {
-				$extractor->build_post_url($_POST['eio_extraction_url'], $_POST['eio_connector'], function($status, $param) {
+				$extractor->build_post_url($_POST['eio_extraction_url'], $connector['guid'], function($status, $param) use($connector) {
 					$error = null;
 					
 					switch ($status) {
@@ -172,11 +173,11 @@ final class EIO_Menu_Manager {
 					'site_url' => get_site_url(),
 					'extraction_url' => $_POST['eio_extraction_url'],
 					'plugin_data' => EIO()->plugin_data(),
-					'connector_mapping' => EIO()->connector_mappings->get_option($_POST['eio_connector']),
+					'connector_mapping' => EIO()->connector_mappings->get_option($connector['guid']),
 					'data' => array()
 				);
 				
-				$extractor->build_post_url($_POST['eio_extraction_url'], $_POST['eio_connector'], function($status, $param) {
+				$extractor->build_post_url($_POST['eio_extraction_url'], $connector['guid'], function($status, $param) {
 					global $eio_report_data;
 					
 					switch ($status) {
