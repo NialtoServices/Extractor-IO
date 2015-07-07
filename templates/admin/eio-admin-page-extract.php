@@ -5,7 +5,7 @@
  * @author     Nialto Services
  * @package    ExtractorIO
  * @subpackage Templates/Admin
- * @version    1.0.0
+ * @version    1.0.1
  */
  
 // Ensure we are not being accessed directly.
@@ -29,7 +29,8 @@ if (!defined('ABSPATH')) {
 					<td>
 						<select name="eio_connector" width="100" style="width: 100%; max-width: 300px;">
 							<?php foreach ($connectors as $connector): ?>
-							<option value="<?php echo $connector['fields']['guid']; ?>"><?php echo $connector['fields']['name']; ?> (<?php echo $connector['fields']['domain']; ?>)</option>
+							<?php $value = base64_encode(json_encode(array('name' => $connector['fields']['name'], 'guid' => $connector['fields']['guid']))); ?>
+							<option value="<?php echo $value; ?>"><?php echo $connector['fields']['name']; ?> (<?php echo $connector['fields']['domain']; ?>)</option>
 							<?php endforeach; ?>
 						</select>
 					</td>
