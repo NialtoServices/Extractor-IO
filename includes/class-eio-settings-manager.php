@@ -119,7 +119,7 @@ final class EIO_Settings_Manager {
 		}
 
 		$user = $import_io->current_user();
-		
+
 		if (false === is_array($user) || empty($user) || false === array_key_exists('username', $user) || false === is_string($user['username'])) {
 			eio_add_error_notice(
 				__('The API Key was incorrect.', 'extractor-io')
