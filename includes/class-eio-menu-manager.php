@@ -147,13 +147,19 @@ final class EIO_Menu_Manager {
 						
 						case EIO_Extractor::EXTRACTED_DATA_NULL:
 						case EIO_Extractor::EXTRACTION_RESULTS_NULL:
-						case EIO_Extractor::CONNECTOR_MAPPING_NULL:
 							$error = sprintf(
 								__('No data could be extracted from the URL:<br /><strong>%s</strong><br /><br />Make sure you choose the correct connector that matches up to the URL.', 'extractor-io'),
 								$_POST['eio_extraction_url']
 							);
 							break;
-						
+
+						case EIO_Extractor::CONNECTOR_MAPPING_NULL:
+							$error = sprintf(
+								__('You have not configured the connector mapping for %s.<br /><br />Go to <strong>Extractor IO</strong> -> <strong>Settings</strong>, then click/tap on the <strong>Edit Mapping</strong> button next to the connector you wish to configure.', 'extractor-io'),
+								$connector['name']
+							);
+							break;
+
 						case EIO_Extractor::POST_EXTRACTED:
 							eio_safe_redirect(get_edit_post_link($param));
 							break;
