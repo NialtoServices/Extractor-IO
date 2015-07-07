@@ -103,9 +103,7 @@ final class EIO_Settings_Manager {
 		$api_key = esc_attr($_POST['eio_api_key']);
 		
 		if (false === is_string($api_key) || empty($api_key)) {
-			eio_add_error_notice(
-				__('You must provide an <strong>API Key</strong>', 'extractor-io')
-			);
+			EIO()->options->delete_option('api_key');
 			
 			return;
 		}
