@@ -2,13 +2,13 @@
 ```
 -----BEGIN PGP SIGNATURE-----
 
-iQEcBAABCAAGBQJWAT8DAAoJEI9C76DX7FYR12kIAKFFtpJMqZ7aT+YBgBT1OnDX
-K5rt6S8Hf8I8i2+yY5EEmi745kYRKh6VgizgU0MJvFwfykndK/PW+fGVJLXTKacC
-FPuYJ2sEQY3GtYCqyS+vsL+yv7nq3KZoCMZuO51MOuQ8i4TSiZ+1fTk0XuI+5dgT
-pctPC93Jh8yabBveMT7di29a8CC2NucDD1dtiI77D2JQcR2D7Bgeuo6wXDOJdMLK
-A6JgzePzaWOqhZFxdnDny5J+AZNn0QkxiQ5J5XtgKT8azXVqy2x9quaMu0MFxFFQ
-gjyiEunImTrp7a0trBWFnKJqVYFLSoEj6QuHTDxQ5h9GueMemprp5DmAXY45jIA=
-=qrqE
+iQEcBAABCAAGBQJWAT/6AAoJEI9C76DX7FYRstcH/0Di9bhukS0ySy6Cbvj4r1lE
+t46n+LeH/0vz0jWXWKcbASNCJMzD/N3qqVRc8evj1YgapIKfWg2wqrt3O277m+Wj
+12qK0l4oRgKUlgsKFm0ABQ2CWxU3MQ24NlzLtVHu7MJzBEb7pa99xHnTuGIUcgAz
+Wtqef+bT0DwomH82qcZZxh1whZR5bHo6o4uO7KvTO0R3HcAEqH4Io+XvMZT6l5iR
+I8MtDmv9R5hCQhVWoYG5iGg5wu3b+IGtgHv2Iiobg+mcT4fvWnN0S3fHDJDWL7eD
+nUVxintGVzHDVJddqThArLj2gHBarQGrCRn9sKWV2RaHOdAS/hD8upTa6LwOOQk=
+=wG/s
 -----END PGP SIGNATURE-----
 
 ```
@@ -23,7 +23,7 @@ gjyiEunImTrp7a0trBWFnKJqVYFLSoEj6QuHTDxQ5h9GueMemprp5DmAXY45jIA=
 size   exec  file                                             contents                                                                                                                         
              ./                                                                                                                                                                                
 820    x       .gitignore                                     b50a5b7c8502c362ccbce861d2d85c2a013493a2d0aa15a3dfd1f2b8dc1961c1                                                                 
-6216   x       Extractor-IO.php                               0ae45f512f9275a8ba457f90f5196c4df2fe85b946f2cd95ed252052b04492ff                                                                 
+6216   x       Extractor-IO.php                               db16cf25bf6ca966508279e08192a22b0db9e71d16681ad5c2eb3bc2d9ac97aa                                                                 
 15168  x       LICENSE                                        d80b9afac9c47a7cb63111f41a7390e36773539de0b39c6c1824b6617479d28e                                                                 
 777    x       README.md                                      29c3bab9d87239eaa746ec7647d345ed77e5a8431edbff6495b2d7a276d1fa57                                                                 
                assets/                                                                                                                                                                         
@@ -36,7 +36,7 @@ size   exec  file                                             contents
 1071   x           eio-admin.js                               01aac9942b940e05214dce2b124954fb3baafb10020ed1ed41365a864d0cf906                                                                 
                includes/                                                                                                                                                                       
 3528   x         class-eio-basic-table.php                    653e0445edf9c381066203d9b07b780a0b6eefe49699ca8f8ce46f054287a1e2                                                                 
-4913   x         class-eio-connector-mapping-table.php        c9909c3e36fb02492790178be4611f395dde9314b57ba1ef575da54138e93456                                                                 
+4913   x         class-eio-connector-mapping-table.php        a79d831adf8d6a49fa5038a528c156f1322e2d9ad6ad913d91ead7e7bb2fc873                                                                 
 4101   x         class-eio-connectors-table.php               73ada9633c3bc5bacc1c05ae5704c9db84f51abe9b1febd91ce21b7084ecb653                                                                 
 9196   x         class-eio-extractor.php                      cfb673899b9f5625d09e6ca99811f4ca43e6ac502de0d0be771695e30628a29a                                                                 
 31039  x         class-eio-list-table.php                     532d05655e9f848dd98761a7ad2da3fe216932527081eae735baf3e3fd67f1ac                                                                 
@@ -53,7 +53,7 @@ size   exec  file                                             contents
 2923   x           eio-admin-page-extract.php                 1b4baa8e1e2155a37bdf2d52c4f7048c5a2e0da537fac0582b2b476434516231                                                                 
 2389   x           eio-admin-page-parse-report.php            2d5c07a77169bef8afb515d1299a442a4314f6cbd1c5515884ed909716d34b9b                                                                 
 2403   x           eio-admin-page-report-data.php             c9ff0978d8b30fbe3c4962371b6e0c9429afcf8ebcf33c5ac6553a0185568442                                                                 
-2629   x           eio-admin-page-settings.php                da2f81cdae5ca7f89a42c3953eeddc780524333e8d80dcfce20f5faae84a9b34                                                                 
+2629   x           eio-admin-page-settings.php                c73ee150b79f2b469cd23728d1c5210bef6dfb4780801e7262e6e98c6bb07212                                                                 
 1057   x       uninstall.php                                  6673ef276a258557faeb6d443bae4d29ccf56662067a355cfc88f86a7a19962a                                                                 
 ```
 
