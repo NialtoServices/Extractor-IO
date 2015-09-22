@@ -6,13 +6,22 @@ Download the latest version of the plugin from [GitHub](https://github.com/Nialt
 
 Then upload the plugin to your WordPress site by going to: `Plugins -> Add New -> Upload Plugin`
 
-Once you have installed the plugin, go to settings: `Extractor IO -> Settings`
+(We're working on adding the plugin to WordPress's plugins repository)
 
-Add your `API Key` and `User GUID` which you can get from your [Import IO](https://import.io) account page.
+## Setup
+Go to the plugin settings: `Extractor IO -> Settings`
 
-Setup connector mapping by going to: `Extractor IO -> Settings -> (Your Connector) -> Edit Mapping`
+Enter your `API Key` which you can get from your [Import IO](https://import.io) account settings page.
 
-Now setup where you want your extractor's fields to be imported to.
+You should now see a list of connectors at the bottom of the page.
 
-## Extract Data!
-Use the extractor to import your data!
+Click the `Edit Mapping` link next to the connector you want to setup.
+
+Now just define where your fields should be imported to!
+
+## Extract
+All you need to do now is go to the `Extractor IO` page, wack in your URL, click the `Extract Data` button and voila!
+
+Your data will be converted into a WordPress post!
+
+Happy Extracting :)
