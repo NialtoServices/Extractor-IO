@@ -122,6 +122,11 @@ final class EIO_Connector_Mapping_Table extends EIO_List_Table {
 				'import_only' => 'Import Only',
 				'post_content' => 'Post Content'
 			);
+		} else if ('URL' === $field['type']) {
+			$importable_locations = array(
+				'ignore' => 'Ignore',
+				'post_content' => 'Post Content'
+			);
 		}
 		
 		if (0 < count($importable_locations)) {
