@@ -35,7 +35,7 @@ if (!class_exists('EIO_Connector_Mapping_Table')):
  *
  * @class      EIO_Connector_Mapping_Table
  * @category   Table List Class
- * @version    1.0.0
+ * @version    1.0.1
  * @since      1.0.0
  * @author     Nialto Services
  * @copyright  2015 Nialto Services

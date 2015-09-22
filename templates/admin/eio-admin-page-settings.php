@@ -5,7 +5,7 @@
  * @author     Nialto Services
  * @package    ExtractorIO
  * @subpackage Templates/Admin
- * @version    1.0.0
+ * @version    1.0.1
  *
  *
  * Extractor IO - Admin Template - Settings Page
