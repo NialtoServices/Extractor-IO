@@ -49,7 +49,7 @@ $connection_status = '<div class="' . $connection_class . '" style="' . $connect
 	<form method="post" class="eio-settings-form">
 		<?php wp_nonce_field('eio_update_settings', 'eio_settings_nonce'); ?>
 		<h3>Import IO</h3>
-		<p><?php _e("To use this plugin, you'll need to provide your User ID and API Key from your Import IO account.<br />These settings can be found on your account page at https://import.io", 'extractor-io'); ?><p>
+		<p><?php _e("To use this plugin, you'll need to provide your Import IO 'API Key'.<br />You'll find these settings in your <a href=\"https://import.io/data/account/\">Import IO account</a>.", 'extractor-io'); ?><p>
 		<table class="form-table">
 			<tbody>
 				<tr>
