@@ -1,6 +1,8 @@
 ## Extractor IO
 A simple plugin for WordPress that allows you to extract data from web pages and convert them into posts.
 
+This plugin currently only works with Extractors.
+
 ## Installation
 Download the latest version of the plugin from [GitHub](https://github.com/NialtoServices/Extractor-IO/archive/master.zip).
 
