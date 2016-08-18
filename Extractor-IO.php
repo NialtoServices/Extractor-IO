@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/NialtoServices/Extractor-IO
  * Description: A simple import.io extractor for WordPress.
  * Author: Nialto Services
- * Version: 2.0.5
+ * Version: 2.0.6
  * Author URI: https://nialtoservices.co.uk
  * License: GPLv2
  *
