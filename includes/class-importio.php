@@ -49,7 +49,7 @@ class ImportIO {
 	 * @access private
 	 */
 	private $api_url = 'https://api.import.io';
-	
+
 	/**
 	 * The API Key
 	 *
@@ -57,7 +57,7 @@ class ImportIO {
 	 * @access private
 	 */
 	private $api_key = null;
-	
+
 	/**
 	 * An array of connectors
 	 *
@@ -65,7 +65,7 @@ class ImportIO {
 	 * @access public
 	 */
 	public $connectors = array();
-	
+
 	/**
 	 * Setup an instance of the ImportIO class.
 	 *
@@ -82,10 +82,10 @@ class ImportIO {
 				__('You must provide an API Key.', 'extractor-io')
 			);
 		}
-		
+
 		$this->api_key = $api_key;
 	}
-	
+
 	/**
 	 * Get the current user
 	 *
@@ -99,19 +99,19 @@ class ImportIO {
 		$url = $this->api_url;
 		$url .= '/auth/currentuser';
 		$url .= '?_apikey=' . urlencode($this->api_key);
-		
+
 		$response = wp_remote_get($url, $this->build_wp_remote_args());
 		$response_code = wp_remote_retrieve_response_code($response);
-		
+
 		if (in_array($response_code, range(200, 299))) {
 			return json_decode($response['body'], true);
 		} else {
 			error_log('ImportIO: current_user() failed (' . $response_code . '): ' . json_encode($response));
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Pull Connectors
 	 *
@@ -128,9 +128,9 @@ class ImportIO {
 
 		$page = 1;
 		$per_page = 100;
-		
+
 		$sort_direction = 'DESC';
-		
+
 		while (true) {
 			$url = $this->api_url;
 			$url .= '/store/connector/_search';
@@ -138,21 +138,21 @@ class ImportIO {
 			$url .= '&_page=' . $page;
 			$url .= '&_perpage=' . $per_page;
 			$url .= '&_sortDirection=' . $sort_direction;
-						
+
 			$response = wp_remote_get($url, $this->build_wp_remote_args());
 			$response_code = wp_remote_retrieve_response_code($response);
-			
-			if (in_array($response_code, range(200, 299))) {				
+
+			if (in_array($response_code, range(200, 299))) {
 				$body = json_decode($response['body'], true);
-				
+
 				if (is_null($body)) {
 					error_log('ImportIO: pullConnectors() failed: Unable to parse response (Possibly not a JSON response).');
 					return false;
 				}
-				
+
 				if (array_key_exists('hits', $body) && array_key_exists('hits', $body['hits'])) {
 					$hits = $body['hits']['hits'];
-					
+
 					if (0 < count($hits)) {
 						foreach ($hits as $connector) {
 							if ('EXTRACTOR' === $connector['fields']['type']) {
@@ -171,19 +171,19 @@ class ImportIO {
 				error_log('ImportIO: pullConnectors() failed (' . $response_code . '): ' . json_encode($response));
 				return false;
 			}
-			
+
 			if (15 === $page) {
 				break;
 			}
-			
+
 			$page += 1;
 		}
-		
+
 		$this->connectors = $connectors;
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Get Connector Schema
 	 *
@@ -199,23 +199,23 @@ class ImportIO {
 		if (!is_string($connector_version_guid) || empty($connector_version_guid)) {
 			throw new BadFunctionCallException('You must provide the GUID of the connector version.');
 		}
-		
+
 		$url = $this->api_url;
 		$url .= '/store/connectorversion/' . $connector_version_guid . '/schema';
 		$url .= '?_apikey=' . urlencode($this->api_key);
-		
+
 		$response = wp_remote_get($url, $this->build_wp_remote_args());
 		$response_code = wp_remote_retrieve_response_code($response);
-		
+
 		if (in_array($response_code, range(200, 299))) {
 			return json_decode($response['body'], true);
 		} else {
 			error_log('ImportIO: getConnectorSchema("' . $connector_version_guid . '") failed (' . $response_code . '): ' . json_encode($response));
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Extract data from a URL
 	 *
@@ -231,37 +231,37 @@ class ImportIO {
 		if (empty($connector_guid)) {
 			throw new BadFunctionCallException('Invalid connector specified.');
 		}
-		
+
 		if (empty($extract_url) || false === filter_var($extract_url, FILTER_VALIDATE_URL)) {
 			throw new BadFunctionCallException('Invalid URL specified.');
 		}
-		
+
 		$url = $this->api_url;
 		$url .= '/store/connector/' . $connector_guid . '/_query';
 		$url .= '?_apikey=' . urlencode($this->api_key);
-		
+
 		$headers = array(
 			'Content-Type' => 'application/json'
 		);
-		
+
 		$body = json_encode(array(
 			'input' => array(
 				'webpage/url' => $extract_url
 			)
 		));
-		
+
 		$response = wp_remote_post($url, $this->build_wp_remote_args($headers, $body));
 		$response_code = wp_remote_retrieve_response_code($response);
-		
+
 		if (in_array($response_code, range(200, 299))) {
 			return json_decode($response['body'], true);
 		} else {
 			error_log('ImportIO: extractData("' . $connector['fields']['guid'] . '", "' . $extract_url . '") failed (' . $response_code . '): ' . json_encode($response));
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Build arguments for the Wordpress Remote functions
 	 *
@@ -276,9 +276,9 @@ class ImportIO {
 		if (!is_array($headers)) {
 			throw new BadFunctionCallException('The $headers parameter should be an array.');
 		}
-		
+
 		return array(
-			'timeout' => 5,
+			'timeout' => 20,
 			'redirection' => 5,
 			'httpversion' => '1.1',
 			'user-agent' => 'WPExtractorIO/1.0',
